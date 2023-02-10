@@ -15,12 +15,6 @@ const Header = () => {
           <NavLink to="/add" className="text-white font-bold ">
             Add User
           </NavLink>
-          <NavLink to="/edit/1" className="text-white font-bold ">
-            Edit
-          </NavLink>
-          <NavLink to="/userinfo" className="text-white font-bold ">
-            User Info
-          </NavLink>
         </nav>
       </div>
     </header>

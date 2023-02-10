@@ -14,7 +14,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/add" element={<AddEditUser />} />
         <Route path="/edit/:id" element={<AddEditUser />} />
-        <Route path="/userinfo" element={<UserInfo />} />
+        <Route path="/userinfo/:id" element={<UserInfo />} />
       </Routes>
     </>
   );

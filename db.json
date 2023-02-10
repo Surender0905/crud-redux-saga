@@ -6,6 +6,13 @@
       "email": "roshan@gmail.com",
       "phone": 9876543210,
       "address": "Lucknow"
+    },
+    {
+      "name": "Tara Ramirez",
+      "phone": "+1 (654) 554-3037",
+      "email": "ryhicirub@mailinator.com",
+      "address": "Adipisci ratione ape",
+      "id": 2
     }
   ]
 }

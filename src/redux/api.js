@@ -9,3 +9,12 @@ export const loadUsersApi = async () => {
     throw error;
   }
 };
+
+export const createUserApi = async (user) => {
+  console.log('user', user);
+  try {
+    return await axios.post('http://localhost:5000/users', user);
+  } catch (error) {
+    throw error;
+  }
+};
