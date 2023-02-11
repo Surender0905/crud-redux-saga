@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { createUserStart } from '../redux/action';
+import { createUserStart, updateUserStart } from '../redux/action';
+import { toast } from 'react-toastify';
 
 const initialValue = {
   name: '',
@@ -13,7 +14,9 @@ const initialValue = {
 
 const AddEditUser = (props) => {
   const [inputs, setInputs] = useState(initialValue);
+  const [editMode, setEditMode] = useState(false);
   const history = useNavigate();
+  const { id } = useParams();
 
   const { name, phone, email, address } = inputs;
 
@@ -26,22 +29,41 @@ const AddEditUser = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log('input');
     if (name && phone && email && address) {
-      console.log('input', inputs);
-      props.createUser(inputs);
+      if (!editMode) {
+        props.createUser(inputs);
+        toast.success('User is created');
 
+        setTimeout(() => history('/'), 500);
+        return;
+      }
+      props.updateUser({ id, inputs });
+      toast.success('User updated successfully');
+      setEditMode(false);
       setTimeout(() => history('/'), 500);
-      console.log('output');
     }
 
     setInputs(initialValue);
   };
 
+  useEffect(() => {
+    if (id) {
+      setEditMode(true);
+      const singleUser = props.users.users.find((item) => item.id === +id);
+
+      setInputs({ ...singleUser });
+      return;
+    }
+    setEditMode(false);
+    setInputs({ ...initialValue });
+  }, [id]);
+
   return (
     <Layout>
       <div className="py-12">
-        <h1 className="text-center text-3xl text-blue-400">Edit and Update</h1>
+        <h1 className="text-center text-3xl text-blue-400">
+          {editMode ? 'Edit and Update User' : 'Add User'}
+        </h1>
       </div>
 
       <div className="block p-6 rounded-lg shadow-lg bg-white max-w-md">
@@ -50,7 +72,7 @@ const AddEditUser = (props) => {
             <div className="form-group mb-6">
               <input
                 required
-                value={name}
+                value={name || ''}
                 type="text"
                 name="name"
                 onChange={handleChange}
@@ -75,7 +97,7 @@ const AddEditUser = (props) => {
               <input
                 required
                 type="text"
-                value={phone}
+                value={phone || ''}
                 name="phone"
                 onChange={handleChange}
                 className="form-control
@@ -99,7 +121,7 @@ const AddEditUser = (props) => {
           <div className="form-group mb-6">
             <input
               required
-              value={email}
+              value={email || ''}
               type="email"
               onChange={handleChange}
               name="email"
@@ -122,7 +144,7 @@ const AddEditUser = (props) => {
             <input
               required
               type="text"
-              value={address}
+              value={address || ''}
               onChange={handleChange}
               className="form-control block
         w-full
@@ -160,7 +182,7 @@ const AddEditUser = (props) => {
     
       "
             >
-              Add
+              {editMode ? 'Update' : 'Add'}
             </button>
 
             <button
@@ -192,11 +214,14 @@ const AddEditUser = (props) => {
 };
 
 const mapStateToProps = (state) => {
-  return {};
+  return {
+    users: state.users,
+  };
 };
 
 const mapDispatchToProps = {
   createUser: createUserStart,
+  updateUser: updateUserStart,
 };
 
 const AddEditUserBox = connect(mapStateToProps, mapDispatchToProps);

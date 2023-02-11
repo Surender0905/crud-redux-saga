@@ -1,22 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Layout from '../components/Layout';
-import { loadUsersStart } from '../redux/action';
+import { deleteUserStart, loadUsersStart } from '../redux/action';
 
 const Home = (props) => {
   useEffect(() => {
     props.userLoadingStart();
   }, []);
 
-  const handleDelete = (id) => {};
+  useEffect(() => {
+    props.users?.users?.error && toast.error(props.users?.users?.error);
+  }, [props.users?.users.error]);
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you wanted to delete th user?')) {
+      props.userDeleteStart(id);
+      toast.success('User deleted successfully');
+    }
+  };
   return (
     <>
       <Layout>
         <div>
-          {' '}
           {props.users?.loading ? (
-            <h1 className="text-center text-3xl text-blue-400">Loading...</h1>
+            <div className="flex justify-center items-center">
+              <div
+                className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+                role="status"
+              ></div>
+            </div>
           ) : (
             <h1 className="text-center text-3xl text-blue-400">Home Page</h1>
           )}
@@ -106,6 +120,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = {
   userLoadingStart: loadUsersStart,
+  userDeleteStart: deleteUserStart,
 };
 const HomeConnect = connect(mapStateToProps, mapDispatchToProps);
 export default HomeConnect(Home);

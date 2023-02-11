@@ -4,6 +4,7 @@ import {
   delay,
   fork,
   put,
+  take,
   takeEvery,
   takeLatest,
 } from 'redux-saga/effects';
@@ -11,11 +12,21 @@ import {
   createUserFail,
   createUserSucess,
   CREATE_USER_START,
+  deleteUserFail,
+  deleteUserSucess,
+  DELETE_USER_START,
   loadUsersFail,
   loadUsersSucess,
   LOAD_USER_START,
+  updateUserStart,
+  UPDATE_USER_START,
 } from './action';
-import { createUserApi, loadUsersApi } from './api';
+import {
+  createUserApi,
+  deleteUserApi,
+  loadUsersApi,
+  updateUserApi,
+} from './api';
 
 function* fetchUser(action) {
   try {
@@ -32,14 +43,36 @@ function* fetchUser(action) {
 }
 
 function* createUserStart({ payload }) {
-  console.log('payload', payload);
   try {
     const res = yield call(createUserApi, payload);
 
-    console.log(res, 'res');
+    if (res.status === 201) {
+      yield put(createUserSucess(res.data));
+    }
+  } catch (error) {
+    yield put(createUserFail(error.res.data));
+  }
+}
+
+function* deleteUserSaga(userId) {
+  try {
+    const res = yield call(deleteUserApi, userId);
 
     if (res.status === 200) {
-      yield put(createUserSucess(res.data));
+      yield delay(500);
+      yield put(deleteUserSucess(userId));
+    }
+  } catch (error) {
+    yield put(deleteUserFail(error.res.data));
+  }
+}
+
+function* updateUserSaga({ payload: { id, inputs } }) {
+  try {
+    const res = yield call(updateUserApi, id, inputs);
+
+    if (res.status === 200) {
+      yield put(createUserSucess());
     }
   } catch (error) {
     yield put(createUserFail(error.res.data));
@@ -53,7 +86,23 @@ export function* onLoadUsers() {
 export function* onCreateUser() {
   yield takeLatest(CREATE_USER_START, createUserStart);
 }
-const userSagas = [fork(onLoadUsers), fork(onCreateUser)];
+
+export function* onUpdateUser() {
+  yield takeLatest(UPDATE_USER_START, updateUserSaga);
+}
+
+export function* onDeleteUser() {
+  while (true) {
+    const { payload: userId } = yield take(DELETE_USER_START);
+    yield call(deleteUserSaga, userId);
+  }
+}
+const userSagas = [
+  fork(onLoadUsers),
+  fork(onCreateUser),
+  fork(onDeleteUser),
+  fork(onUpdateUser),
+];
 
 export default function* rootSage() {
   yield all([...userSagas]);
